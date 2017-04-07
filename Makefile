@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2000-2009
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# (C) Copyright 2000-2009# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -160,7 +159,7 @@ export	ARCH CPU BOARD VENDOR SOC
 
 # set default to nothing for native builds
 ifeq ($(HOSTARCH),$(ARCH))
-CROSS_COMPILE ?=
+CROSS_COMPILE ?= arm-Linux-
 endif
 
 # load other configuration
@@ -2993,7 +2992,8 @@ sheevaplug_config: unconfig
 
 smdk2400_config	:	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2400 samsung s3c24x0
-
+smdk2440_config :   unconfig
+	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2440 samsung s3c24x0
 smdk2410_config	:	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2410 samsung s3c24x0
 
@@ -3721,3 +3721,4 @@ backup:
 	gtar --force-local -zcvf `date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F
 
 #########################################################################
+

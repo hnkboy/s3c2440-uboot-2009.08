@@ -110,12 +110,30 @@ start_code:
 	 * set the cpu to SVC32 mode
 	 */
 	mrs	r0,cpsr
-	bic	r0,r0,#0x1f
+	bic	r0,r0,#0x1f //位清楚指令格式
 	orr	r0,r0,#0xd3
 	msr	cpsr,r0
 
-	bl coloured_LED_init
-	bl red_LED_on
+	/*bl coloured_LED_init  //LED初始化，注释掉。
+	bl red_LED_on*/
+
+#if defined(CONFIG_S3C2440)
+#define GPBCON 0x56000010
+#define GPBDAT 0x56000014
+#define GPBUP  0x56000018   
+    ldr r0, =GPBUP
+    ldr r1, =0x7FF    
+    str r1, [r0]
+
+    ldr r0, =GPBCON   
+    ldr r1, =0x154FD  
+    str r1, [r0]
+
+    ldr r0, =GPBDAT
+    ldr r1, =0x1C0    
+    str r1, [r0] 
+
+#endif
 
 #if	defined(CONFIG_AT91RM9200DK) || defined(CONFIG_AT91RM9200EK)
 	/*
@@ -131,7 +149,7 @@ copyex:
 	bne	copyex
 #endif
 
-#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410)
+#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410) || defined(CONFIG_S3C2440)
 	/* turn off the watchdog */
 
 # if defined(CONFIG_S3C2400)
@@ -161,20 +179,43 @@ copyex:
 	str	r1, [r0]
 # endif
 
+#if defined(CONFIG_S3C2440) // 添加s3c2440的中断禁止部分
+    ldr r1, =0x7fff //根据2440芯片手册，INTSUBMSK寄存器有15位可用
+    ldr r0, =INTSUBMSK
+    str r1, [r0]
+#endif 
+
+#if defined(CONFIG_S3C2440) //添加s3c2440的时钟部分
+#define MPLLCON 0x4c000004  //系统主频配置寄存器基地址
+#define UPLLCON 0x4c000008  //USB时钟频率配置寄存器基地址
+    ldr r0, =CLKDIVN        //设置分频系数FCLK:HCLK:PCLK = 1:4:8
+    mov r1, #5
+    str r1, [r0]
+    ldr r0, =MPLLCON        //设置系统主频为405MHz
+    ldr r1, =0x7F021        //这个值参考芯片手册“PLL VALUE SELECTION TABLE”部分
+    str r1,[r0]
+    ldr r0, =UPLLCON        //设置USB时钟频率为48MHz
+    ldr r1, =0x38022        //这个值参考芯片手册“PLL VALUE SELECTION TABLE”部分
+    str r1,[r0]
+#else                       //其他开发板的时钟部分，这里就不用管了，我们现在是做2440的
+
 	/* FCLK:HCLK:PCLK = 1:2:4 */
 	/* default FCLK is 120 MHz ! */
 	ldr	r0, =CLKDIVN
 	mov	r1, #3
 	str	r1, [r0]
+	
+#endif 
+
 #endif	/* CONFIG_S3C2400 || CONFIG_S3C2410 */
 
 	/*
 	 * we do sys-critical inits only at reboot,
 	 * not when booting from ram!
 	 */
-#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+/*  #ifndef CONFIG_SKIP_LOWLEVEL_INIT
 	bl	cpu_init_crit
-#endif
+#endif */
 
 #ifndef CONFIG_SKIP_RELOCATE_UBOOT
 relocate:				/* relocate U-Boot to RAM	    */
