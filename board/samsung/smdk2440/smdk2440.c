@@ -26,7 +26,7 @@
  */
 
 #include <common.h>
-#include <s3c2440.h>
+#include <s3c2410.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

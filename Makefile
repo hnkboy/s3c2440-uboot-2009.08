@@ -2992,7 +2992,7 @@ sheevaplug_config: unconfig
 
 smdk2400_config	:	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2400 samsung s3c24x0
-smdk2440_config :   unconfig
+smdk2440_config :	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2440 samsung s3c24x0
 smdk2410_config	:	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2410 samsung s3c24x0
