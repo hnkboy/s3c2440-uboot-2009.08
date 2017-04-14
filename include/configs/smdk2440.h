@@ -40,6 +40,8 @@
 /* input clock of PLL */
 #define CONFIG_SYS_CLK_FREQ	12000000/* the SMDK2410 has 12MHz input clock */
 
+//#define CONFIG_SKIP_LOWLEVEL_INIT    1
+//#define CONFIG_SKIP_RELOCATE_UBOOT          1
 
 #define USE_920T_MMU		1
 #undef CONFIG_USE_IRQ			/* we don't need IRQ/FIQ stuff */
@@ -112,7 +114,7 @@
  * Miscellaneous configurable options
  */
 #define	CONFIG_SYS_LONGHELP				/* undef to save memory		*/
-#define	CONFIG_SYS_PROMPT		"SMDK2410 # "	/* Monitor Command Prompt	*/
+#define	CONFIG_SYS_PROMPT		"[SMDK2440] # "	/* Monitor Command Prompt	*/
 #define	CONFIG_SYS_CBSIZE		256		/* Console I/O Buffer Size	*/
 #define	CONFIG_SYS_PBSIZE (CONFIG_SYS_CBSIZE+sizeof(CONFIG_SYS_PROMPT)+16) /* Print Buffer Size */
 #define	CONFIG_SYS_MAXARGS		16		/* max number of command args	*/
@@ -156,8 +158,9 @@
  * FLASH and environment organization
  */
 
-#define CONFIG_AMD_LV400	1	/* uncomment this if you have a LV400 flash */
+#define CONFIG_SST_39VF1601 	1	/* uncomment this if you have a LV400 flash */
 #if 0
+#define CONFIG_AMD_LV400	1	/* uncomment this if you have a LV400 flash */
 #define CONFIG_AMD_LV800	1	/* uncomment this if you have a LV800 flash */
 #endif
 
@@ -171,6 +174,12 @@
 #define PHYS_FLASH_SIZE		0x00080000 /* 512KB */
 #define CONFIG_SYS_MAX_FLASH_SECT	(11)	/* max number of sectors on one chip */
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + 0x070000) /* addr of environment */
+#endif
+
+#ifdef  CONFIG_SST_39VF1601
+#define PHYS_FLASH_SIZE		0x200000 /* 2M */
+#define CONFIG_SYS_MAX_FLASH_SECT	(512)	/* max number of sectors on one chip */
+#define CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + 0x040000) /* addr of environment */
 #endif
 
 /* timeout values are in ticks */
