@@ -26,6 +26,10 @@ include $(TOPDIR)/config.mk
 LIB	:= $(obj)libnand.a
 
 ifdef CONFIG_CMD_NAND
+
+COBJS-y += s3c2440_nand.o
+COBJS-$(CONFIG_NAND_S3C2440) += s3c2440_nand
+
 COBJS-y += nand.o
 COBJS-y += nand_base.o
 COBJS-y += nand_bbt.o

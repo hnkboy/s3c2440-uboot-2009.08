@@ -1,8 +1,8 @@
 /*
  *  armboot - Startup Code for ARM920 CPU-core
  *
- *  Copyright (c) 2001	Marius Gr�ger <mag@sysgo.de>
- *  Copyright (c) 2002	Alex Z�pke <azu@sysgo.de>
+ *  Copyright (c) 2001	Marius Grˆger <mag@sysgo.de>
+ *  Copyright (c) 2002	Alex Z¸pke <azu@sysgo.de>
  *  Copyright (c) 2002	Gary Jennejohn <garyj@denx.de>
  *
  * See file CREDITS for list of people who contributed to this
@@ -88,6 +88,10 @@ _bss_start:
 _bss_end:
 	.word _end
 
+.globl BootFlag
+BootFlag:
+.word 0
+
 #ifdef CONFIG_USE_IRQ
 /* IRQ stack memory (calculated at run-time) */
 .globl IRQ_STACK_START
@@ -110,27 +114,27 @@ start_code:
 	 * set the cpu to SVC32 mode
 	 */
 	mrs	r0,cpsr
-	bic	r0,r0,#0x1f //λ���ָ���ʽ
+	bic	r0,r0,#0x1f
 	orr	r0,r0,#0xd3
 	msr	cpsr,r0
 
-	/*bl coloured_LED_init  //LED��ʼ����ע�͵���
+	/*bl coloured_LED_init  //LED
 	bl red_LED_on*/
-
+@ LEO on
 #if defined(CONFIG_S3C2440)
-#define GPBCON 0x56000010
-#define GPBDAT 0x56000014
-#define GPBUP  0x56000018   
+    #define GPBCON 0x56000010
+    #define GPBDAT 0x56000014
+    #define GPBUP  0x56000018
     ldr r0, =GPBUP
-    ldr r1, =0x7FF    
+    ldr r1, =0x7FF      //即：二进制11111111111，关闭PB口上拉
     str r1, [r0]
 
     ldr r0, =GPBCON   
-    ldr r1, =0x154FD  
+    ldr r1, =0x154FD    //配置PB5、6、7、8为输出口，对应PBCON寄存器的第10-17位
     str r1, [r0]
 
     ldr r0, =GPBDAT
-    ldr r1, =0x1C0    
+    ldr r1, =0x1C0      //即：二进制111000000，PB5设为低电平，6、7、8为高电平
     str r1, [r0] 
 
 #endif
@@ -148,19 +152,19 @@ copyex:
 	str	r3, [r1], #4
 	bne	copyex
 #endif
-
 #if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410) || defined(CONFIG_S3C2440)
-	/* turn off the watchdog */
+/* turn off the watchdog */
 
 # if defined(CONFIG_S3C2400)
-#  define pWTCON		0x15300000
-#  define INTMSK		0x14400008	/* Interupt-Controller base addresses */
+#  define pWTCON	0x15300000
+#  define INTMSK	0x14400008	/* Interupt-Controller base addresses */
 #  define CLKDIVN	0x14800014	/* clock divisor register */
 #else
-#  define pWTCON		0x53000000
-#  define INTMSK		0x4A000008	/* Interupt-Controller base addresses */
+#  define pWTCON	0x53000000
+#  define INTMSK	0x4A000008	/* Interupt-Controller base addresses */
 #  define INTSUBMSK	0x4A00001C
 #  define CLKDIVN	0x4C000014	/* clock divisor register */
+#  define MPLLCON	0x4C000004
 # endif
 
 	ldr     r0, =pWTCON
@@ -179,25 +183,25 @@ copyex:
 	str	r1, [r0]
 # endif
 
-#if defined(CONFIG_S3C2440) // ����s3c2440���жϽ�ֹ����
-    ldr r1, =0x7fff //����2440оƬ�ֲᣬINTSUBMSK�Ĵ�����15λ����
+#if defined(CONFIG_S3C2440) //添加s3c2440的中断禁止部分
+    ldr r1, =0x7fff         //根据2440芯片手册，INTSUBMSK寄存器有15位可用
     ldr r0, =INTSUBMSK
     str r1, [r0]
 #endif 
 
-#if defined(CONFIG_S3C2440) //����s3c2440��ʱ�Ӳ���
-#define MPLLCON 0x4c000004  //ϵͳ��Ƶ���üĴ�������ַ
-#define UPLLCON 0x4c000008  //USBʱ��Ƶ�����üĴ�������ַ
-    ldr r0, =CLKDIVN        //���÷�Ƶϵ��FCLK:HCLK:PCLK = 1:4:8
+#if defined(CONFIG_S3C2440) //添加s3c2440的时钟部分
+#define MPLLCON 0x4c000004  //系统主频配置寄存器基地址
+#define UPLLCON 0x4c000008  //USB时钟频率配置寄存器基地址
+    ldr r0, =CLKDIVN        //设置分频系数FCLK:HCLK:PCLK = 1:4:8
     mov r1, #5
     str r1, [r0]
-    ldr r0, =MPLLCON        //����ϵͳ��ƵΪ405MHz
-    ldr r1, =0x7F021        //���ֵ�ο�оƬ�ֲᡰPLL VALUE SELECTION TABLE������
+    ldr r0, =MPLLCON        //设置系统主频为405MHz
+    ldr r1, =0x7F021        //这个值参考芯片手册“PLL VALUE SELECTION TABLE”部分
     str r1,[r0]
-    ldr r0, =UPLLCON        //����USBʱ��Ƶ��Ϊ48MHz
-    ldr r1, =0x38022        //���ֵ�ο�оƬ�ֲᡰPLL VALUE SELECTION TABLE������
+    ldr r0, =UPLLCON        //设置USB时钟频率为48MHz
+    ldr r1, =0x38022        //这个值参考芯片手册“PLL VALUE SELECTION TABLE”部分
     str r1,[r0]
-#else                       //�����������ʱ�Ӳ��֣�����Ͳ��ù��ˣ�������������2440��
+#else                       //其他开发板的时钟部分，这里就不用管了，我们现在是做2440的
 
 	/* FCLK:HCLK:PCLK = 1:2:4 */
 	/* default FCLK is 120 MHz ! */
@@ -217,48 +221,163 @@ copyex:
 	bl	cpu_init_crit
 #endif
 
-#ifndef CONFIG_SKIP_RELOCATE_UBOOT
-relocate:				/* relocate U-Boot to RAM	    */
-	adr	r0, _start		/* r0 <- current position of code   */
-	ldr	r1, _TEXT_BASE		/* test if we run from flash or RAM */
-	cmp     r0, r1                  /* don't reloc during debug         */
-	beq     stack_setup
 
-	ldr	r2, _armboot_start
-	ldr	r3, _bss_start
-	sub	r2, r3, r2		/* r2 <- size of armboot            */
-	add	r2, r0, r2		/* r2 <- source end address         */
+
+#ifndef CONFIG_SKIP_RELOCATE_UBOOT
+relocate:				/* relocate U-Boot to RAM */
+	adr r0, _start 		/* r0 <- current position of code */
+	ldr r1, _TEXT_BASE 	/* test if we run from flash or RAM */
+	cmp r0, r1 			/* don't reloc during debug */
+	beq stack_setup
+
+	/***************** CHECK_BOOT_FLASH ******************************************/
+	ldr r1, =0x4000003C	/* address of Internal SRAM 0x4000003C*/
+	mov r0, #0 				/* r0 = 0 */
+	str r0, [r1]
+	mov r1, #0x3c 			/* address of 0x0000003C*/
+	ldr r0, [r1]
+	cmp r0, #0 				/*判断0x0000003C所指向的4个字节是否被清0*/
+	bne norboot 			/*没有被清0，就是在Nor Flash中启动，则跳到Nor Flash的启动代码处norboot*/
+/***************** CHECK_BOOT_FLASH ******************************************/
+
+	/***************** NAND_BOOT *************************************************/
+nandboot:
+	/*******LED***********/
+	ldr r0, =GPBDAT
+	ldr r1, =0x160      //即：二进制101100000，PB6设为低电平，5、7、8为高电平
+	str r1, [r0]
+
+	mov r1, #NAND_CTL_BASE   //复位Nand Flash
+	ldr r2, =( (7<<12)|(7<<8)|(7<<4)|(0<<0) )
+	str r2, [r1, #oNFCONF]   //设置配置寄存器的初始值，参考s3c2440手册
+	ldr r2, [r1, #oNFCONF]
+	ldr r2, =( (1<<4)|(0<<1)|(1<<0) )
+	str r2, [r1, #oNFCONT]   //设置控制寄存器
+	ldr r2, [r1, #oNFCONT]
+	ldr r2, =(0x6)           //RnB Clear
+	str r2, [r1, #oNFSTAT]
+	ldr r2, [r1, #oNFSTAT]
+	mov r2, #0xff            //复位command
+	strb r2, [r1, #oNFCMD]
+	mov r3, #0               //等待
+nand1:
+	add r3, r3, #0x1
+	cmp r3, #0xa
+	blt nand1
+nand2:
+	ldr r2, [r1, #oNFSTAT]   //等待就绪
+	tst r2, #0x4
+	beq nand2
+	ldr r2, [r1, #oNFCONT]
+	orr r2, r2, #0x2         //取消片选
+	str r2, [r1, #oNFCONT]
+	//get read to call C functions (for nand_read())
+	ldr sp, DW_STACK_START   //为C代码准备堆栈,DW_STACK_START定义在下面
+	mov fp, #0
+	//copy U-Boot to RAM
+	ldr r0, =TEXT_BASE//传递给C代码的第一个参数：u-boot在RAM中的起始地址
+	mov r1, #0x0      //传递给C代码的第二个参数：Nand Flash的起始地址
+	mov r2, #0x30000  //传递给C代码的第三个参数：u-boot的长度大小(128k)
+	bl nand_read_ll   //此处调用C代码中读Nand的函数，现在还没有要自己编写实现
+	tst r0, #0x0
+	beq ok_nand_read
+bad_nand_read:
+loop2: b loop2    //infinite loop
+	ok_nand_read:
+	//检查搬移后的数据，如果前4k完全相同，表示搬移成功
+	mov r0, #0
+	ldr r1, =TEXT_BASE
+	mov r2, #0x400           //4 bytes * 1024 = 4K-bytes
+go_next:
+	ldr r3, [r0], #4
+	ldr r4, [r1], #4
+	teq r3, r4
+	bne notmatch
+	subs r2, r2, #4
+	beq stack_setup
+	bne go_next
+notmatch:
+loop3:
+     b loop3           //infinite loop
+
+
+
+
+	/***************** NOR_BOOT *************************************************/
+norboot:
+
+    /*********** CHECK_FOR_MAGIC_NUMBER***************/
+	ldr r1, =0xdeadbeef
+	cmp r0, r1
+	bne loop3
+
+	/*******LED***********/
+	ldr r0, =GPBDAT
+	ldr r1, =0x1A0      //即：二进制110100000，PB6设为低电平，5、7、8为高电平
+	str r1, [r0]
+
+	/*********** CHECK_FOR_MAGIC_NUMBER***************/
+	adr r0, _start 			/* r0 <- current position of code */
+	ldr r1, _TEXT_BASE 		/* test if we run from flash or RAM */
+	ldr r2, _armboot_start
+	ldr r3, _bss_start
+	sub r2, r3, r2 			/* r2 <- size of armboot */
+	add r2, r0, r2 			/* r2 <- source end address */
 
 copy_loop:
-	ldmia	r0!, {r3-r10}		/* copy from source address [r0]    */
-	stmia	r1!, {r3-r10}		/* copy to   target address [r1]    */
-	cmp	r0, r2			/* until source end addreee [r2]    */
-	ble	copy_loop
+	ldmia r0!, {r3-r10} 	/* copy from source address [r0] */
+	stmia r1!, {r3-r10} 	/* copy to target address [r1] */
+	cmp r0, r2 				/* until source end addreee [r2] */
+	ble copy_loop
+
+SetBootFlag:
+	ldr r0,=BootFlag
+	mov r1,#1	/*从Nor启动，将标志设置为1*/
+	str r1,[r0]
+
 #endif	/* CONFIG_SKIP_RELOCATE_UBOOT */
+
+
 
 	/* Set up the stack						    */
 stack_setup:
+	/*******LED***********/
+	ldr r0, =GPBDAT
+	ldr r1, =0x0e0      //即：二进制011100000，PB6设为低电平，5、7、8为高电平
+	str r1, [r0]
+
 	ldr	r0, _TEXT_BASE		/* upper 128 KiB: relocated uboot   */
-	sub	r0, r0, #CONFIG_SYS_MALLOC_LEN	/* malloc area                      */
-	sub	r0, r0, #CONFIG_SYS_GBL_DATA_SIZE /* bdinfo                        */
+	sub	r0, r0, #CONFIG_SYS_MALLOC_LEN	/* malloc area              */
+	sub	r0, r0, #CONFIG_SYS_GBL_DATA_SIZE /* bdinfo                 */
 #ifdef CONFIG_USE_IRQ
 	sub	r0, r0, #(CONFIG_STACKSIZE_IRQ+CONFIG_STACKSIZE_FIQ)
 #endif
 	sub	sp, r0, #12		/* leave 3 words for abort-stack    */
+
 
 clear_bss:
 	ldr	r0, _bss_start		/* find start of bss segment        */
 	ldr	r1, _bss_end		/* stop here                        */
 	mov	r2, #0x00000000		/* clear                            */
 
-clbss_l:str	r2, [r0]		/* clear loop...                    */
+clbss_l:
+	str	r2, [r0]		/* clear loop...                    */
 	add	r0, r0, #4
 	cmp	r0, r1
 	ble	clbss_l
 
+
 	ldr	pc, _start_armboot
 
 _start_armboot:	.word start_armboot
+.align	2
+DW_STACK_START:	.word	STACK_BASE+STACK_SIZE-4
+
+#define STACK_BASE 0x33f00000
+#define STACK_SIZE 0x10000
+
+
+
 
 
 /*

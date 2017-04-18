@@ -164,6 +164,43 @@
 #define CONFIG_AMD_LV800	1	/* uncomment this if you have a LV800 flash */
 #endif
 
+/*
+ * Nand flash register and envionment variables
+ */
+//#define CONFIG_S3C2440_NAND_BOOT  0
+
+#define NAND_CTL_BASE  0x4E000000  //Nand Flash配置寄存器基地址，查2440手册可得知
+
+#define STACK_BASE  0x33F00000     //定义堆栈的地址
+#define STACK_SIZE  0x8000         //堆栈的长度大小
+
+#define oNFCONF  0x00 //相对Nand配置寄存器基地址的偏移量，还是配置寄存器的基地址
+#define oNFCONT  0x04 //相对Nand配置寄存器基地址的偏移量，可得到控制寄存器的基地址(0x4E000004)
+#define oNFADDR  0x0c //相对Nand配置寄存器基地址的偏移量，可得到地址寄存器的基地址(0x4E00000c)
+#define oNFDATA  0x10 //相对Nand配置寄存器基地址的偏移量，可得到数据寄存器的基地址(0x4E000010)
+#define oNFCMD   0x08 //相对Nand配置寄存器基地址的偏移量，可得到指令寄存器的基地址(0x4E000008)
+#define oNFSTAT  0x20 //相对Nand配置寄存器基地址的偏移量，可得到状态寄存器的基地址(0x4E000020)
+#define oNFECC   0x2c //相对Nand配置寄存器基地址的偏移量，可得到ECC寄存器的基地址(0x4E00002c)
+/*-----------------------------------------------------------------------
+ * FLASH and NAND
+ */
+
+#define CONFIG_CMD_NAND
+#define CONFIG_CMDLINE_EDITING
+#ifdef  CONFIG_CMDLINE_EDITING
+#undef  CONFIG_AUTO_COMPLETE
+#else
+#define CONFIG_AUTO_COMPLETE
+#endif
+
+
+#if defined(CONFIG_CMD_NAND)
+#define CONFIG_SYS_NAND_BASE            0x4E000000 //Nand配置寄存器基地址
+#define CONFIG_SYS_MAX_NAND_DEVICE      1
+#define CONFIG_MTD_NAND_VERIFY_WRITE    1
+//#define NAND_SAMSUNG_LP_OPTIONS       1  //注意：我们这里是64M的Nand Flash，所以不用，如果是128M的大块Nand Flash，则需加上
+#endif
+
 #define CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
 #ifdef CONFIG_AMD_LV800
 #define PHYS_FLASH_SIZE		0x00100000 /* 1MB */
@@ -186,7 +223,13 @@
 #define CONFIG_SYS_FLASH_ERASE_TOUT	(5*CONFIG_SYS_HZ) /* Timeout for Flash Erase */
 #define CONFIG_SYS_FLASH_WRITE_TOUT	(5*CONFIG_SYS_HZ) /* Timeout for Flash Write */
 
-#define	CONFIG_ENV_IS_IN_FLASH	1
-#define CONFIG_ENV_SIZE		0x10000	/* Total Size of Environment Sector */
 
+//注释掉环境变量保存到Flash的宏(注意：如果你要使用上一篇中的从Nor启动的saveenv命令，则要恢复这些Flash宏定义)
+//#define	CONFIG_ENV_IS_IN_FLASH	1
+//#define CONFIG_ENV_SIZE		0x10000	/* Total Size of Environment Sector */
+
+//添加环境变量保存到Nand的宏(注意：如果你要使用上一篇中的从Nor启动的saveenv命令，则不要这些Nand宏定义)
+#define CONFIG_ENV_IS_IN_NAND  1
+#define CONFIG_ENV_OFFSET      0x30000 //将环境变量保存到nand中的0x30000位置
+#define CONFIG_ENV_SIZE        0x10000
 #endif	/* __CONFIG_H */
