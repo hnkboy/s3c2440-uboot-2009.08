@@ -167,7 +167,6 @@
 /*
  * Nand flash register and envionment variables
  */
-//#define CONFIG_S3C2440_NAND_BOOT  0
 
 #define NAND_CTL_BASE  0x4E000000  //Nand Flash配置寄存器基地址，查2440手册可得知
 
@@ -230,6 +229,6 @@
 
 //添加环境变量保存到Nand的宏(注意：如果你要使用上一篇中的从Nor启动的saveenv命令，则不要这些Nand宏定义)
 #define CONFIG_ENV_IS_IN_NAND  1
-#define CONFIG_ENV_OFFSET      0x30000 //将环境变量保存到nand中的0x30000位置
-#define CONFIG_ENV_SIZE        0x10000
+#define CONFIG_ENV_OFFSET      0x40000 //将环境变量保存到nand中的0x40000位置
+#define CONFIG_ENV_SIZE        0x20000
 #endif	/* __CONFIG_H */
