@@ -231,13 +231,18 @@ relocate:				/* relocate U-Boot to RAM */
 	beq stack_setup
 
 	/***************** CHECK_BOOT_FLASH ******************************************/
-	ldr r1, =0x4000003C	/* address of Internal SRAM 0x4000003C*/
+	ldr r1, =( (4<<28)|(3<<4)|(3<<2) )	/* address of Internal SRAM 0x4000003C*/
 	mov r0, #0 				/* r0 = 0 */
 	str r0, [r1]
 	mov r1, #0x3c 			/* address of 0x0000003C*/
 	ldr r0, [r1]
 	cmp r0, #0 				/*判断0x0000003C所指向的4个字节是否被清0*/
 	bne norboot 			/*没有被清0，就是在Nor Flash中启动，则跳到Nor Flash的启动代码处norboot*/
+	
+	/* recovery  */
+	ldr r0, =(0xdeadbeef)
+	ldr r1, =( (4<<28)|(3<<4)|(3<<2) )
+	str r0, [r1]
 /***************** CHECK_BOOT_FLASH ******************************************/
 
 	/***************** NAND_BOOT *************************************************/
@@ -278,12 +283,12 @@ nand2:
 	ldr r0, =TEXT_BASE//传递给C代码的第一个参数：u-boot在RAM中的起始地址
 	mov r1, #0x0      //传递给C代码的第二个参数：Nand Flash的起始地址
 	mov r2, #0x30000  //传递给C代码的第三个参数：u-boot的长度大小(128k)
-	bl nand_read_ll   //此处调用C代码中读Nand的函数，现在还没有要自己编写实现
+	bl nand_read_ll   //此处调用C代码中读Nand的函数。
 	tst r0, #0x0
 	beq ok_nand_read
 bad_nand_read:
 loop2: b loop2    //infinite loop
-	ok_nand_read:
+ok_nand_read:
 	//检查搬移后的数据，如果前4k完全相同，表示搬移成功
 	mov r0, #0
 	ldr r1, =TEXT_BASE
@@ -372,12 +377,6 @@ clbss_l:
 _start_armboot:	.word start_armboot
 .align	2
 DW_STACK_START:	.word	STACK_BASE+STACK_SIZE-4
-
-#define STACK_BASE 0x33f00000
-#define STACK_SIZE 0x10000
-
-
-
 
 
 /*
