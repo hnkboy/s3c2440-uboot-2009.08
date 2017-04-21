@@ -27,7 +27,7 @@ int nand_read_ll(unsigned char *buf, unsigned long start_addr, int size)
 
     if ((start_addr & NAND_BLOCK_MASK) || (size & NAND_BLOCK_MASK)) 
     {
-        return -1; //地址或长度不对齐
+        return -1;    //地址或长度不对齐
     }
 
     NAND_CHIP_ENABLE; //选中Nand片选
@@ -39,11 +39,17 @@ int nand_read_ll(unsigned char *buf, unsigned long start_addr, int size)
         NFCMD = 0;
 
         //对Nand进行寻址
-        NFADDR = i & 0xFF;
-        NFADDR = (i >> 9) & 0xFF;
-        NFADDR = (i >> 17) & 0xFF;
-        NFADDR = (i >> 25) & 0xFF;
-
+        //NFADDR = i & 0xFF;
+        //NFADDR = (i >> 9) & 0xFF;
+        //NFADDR = (i >> 17) & 0xFF;
+        //NFADDR = (i >> 25) & 0xFF;
+        //K9K8G08寻址  Col.add.1,2 & ROW Add.1,2,3
+		NFADDR = 0;
+		NFADDR = 0;
+		NFADDR = (i >> 11) & 0xFF;
+		NFADDR = (i >> 19) & 0xFF; 
+		NFADDR = (i >> 27) & 0xFF;
+        
         NAND_DETECT_RB;
 
         for(j=0; j < NAND_SECTOR_SIZE; j++, i++) 
