@@ -44,11 +44,11 @@ int nand_read_ll(unsigned char *buf, unsigned long start_addr, int size)
         //NFADDR = (i >> 17) & 0xFF;
         //NFADDR = (i >> 25) & 0xFF;
         //K9K8G08寻址  Col.add.1,2 & ROW Add.1,2,3
-		NFADDR = 0;
-		NFADDR = 0;
-		NFADDR = (i >> 11) & 0xFF;
-		NFADDR = (i >> 19) & 0xFF; 
-		NFADDR = (i >> 27) & 0xFF;
+	NFADDR = 0;
+	NFADDR = 0;
+	NFADDR = (i >> 11) & 0xFF;
+	NFADDR = (i >> 19) & 0xFF; 
+	NFADDR = (i >> 27) & 0xFF;
         
         NAND_DETECT_RB;
 
