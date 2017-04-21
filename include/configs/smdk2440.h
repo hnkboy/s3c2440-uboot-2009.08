@@ -168,18 +168,7 @@
  * Nand flash register and envionment variables
  */
 
-#define NAND_CTL_BASE  0x4E000000  //Nand Flash配置寄存器基地址，查2440手册可得知
 
-#define STACK_BASE  0x33F00000     //定义堆栈的地址
-#define STACK_SIZE  0x8000         //堆栈的长度大小
-
-#define oNFCONF  0x00 //相对Nand配置寄存器基地址的偏移量，还是配置寄存器的基地址
-#define oNFCONT  0x04 //相对Nand配置寄存器基地址的偏移量，可得到控制寄存器的基地址(0x4E000004)
-#define oNFADDR  0x0c //相对Nand配置寄存器基地址的偏移量，可得到地址寄存器的基地址(0x4E00000c)
-#define oNFDATA  0x10 //相对Nand配置寄存器基地址的偏移量，可得到数据寄存器的基地址(0x4E000010)
-#define oNFCMD   0x08 //相对Nand配置寄存器基地址的偏移量，可得到指令寄存器的基地址(0x4E000008)
-#define oNFSTAT  0x20 //相对Nand配置寄存器基地址的偏移量，可得到状态寄存器的基地址(0x4E000020)
-#define oNFECC   0x2c //相对Nand配置寄存器基地址的偏移量，可得到ECC寄存器的基地址(0x4E00002c)
 /*-----------------------------------------------------------------------
  * FLASH and NAND
  */

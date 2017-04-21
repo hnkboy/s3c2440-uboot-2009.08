@@ -152,9 +152,10 @@ copyex:
 	str	r3, [r1], #4
 	bne	copyex
 #endif
-#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410) || defined(CONFIG_S3C2440)
-/* turn off the watchdog */
 
+#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410) || defined(CONFIG_S3C2440)
+
+/* turn off the watchdog */
 # if defined(CONFIG_S3C2400)
 #  define pWTCON	0x15300000
 #  define INTMSK	0x14400008	/* Interupt-Controller base addresses */
@@ -209,9 +210,20 @@ copyex:
 	mov	r1, #3
 	str	r1, [r0]
 	
-#endif 
+#endif
+#endif	/* CONFIG_S3C2400 || CONFIG_S3C2410 || CONFIG_S3C2440*/
 
-#endif	/* CONFIG_S3C2400 || CONFIG_S3C2410 */
+/* Set up the stack						    */
+stack_setup:
+
+	ldr	r0, _TEXT_BASE		/* upper 128 KiB: relocated uboot   */
+	sub	r0, r0, #CONFIG_SYS_MALLOC_LEN	/* malloc area              */
+	sub	r0, r0, #CONFIG_SYS_GBL_DATA_SIZE /* bdinfo                 */
+	#ifdef CONFIG_USE_IRQ
+	sub	r0, r0, #(CONFIG_STACKSIZE_IRQ+CONFIG_STACKSIZE_FIQ)
+	#endif
+	sub	sp, r0, #12		/* leave 3 words for abort-stack    */
+
 
 	/*
 	 * we do sys-critical inits only at reboot,
@@ -222,15 +234,15 @@ copyex:
 #endif
 
 
-
-#ifndef CONFIG_SKIP_RELOCATE_UBOOT
-relocate:				/* relocate U-Boot to RAM */
+/***************** RAM ******************************************/
 	adr r0, _start 		/* r0 <- current position of code */
 	ldr r1, _TEXT_BASE 	/* test if we run from flash or RAM */
 	cmp r0, r1 			/* don't reloc during debug */
-	beq stack_setup
+	beq clear_bss
+    cmp	r0,#0x30000000
+    bge	relocate
 
-	/***************** CHECK_BOOT_FLASH ******************************************/
+/***************** CHECK_BOOT_FLASH ******************************************/
 	ldr r1, =( (4<<28)|(3<<4)|(3<<2) )	/* address of Internal SRAM 0x4000003C*/
 	mov r0, #0 				/* r0 = 0 */
 	str r0, [r1]
@@ -247,62 +259,44 @@ relocate:				/* relocate U-Boot to RAM */
 
 	/***************** NAND_BOOT *************************************************/
 nandboot:
+
+#define LENGTH_UBOOT 0x40000
+#define NAND_REG_BASE 0x4E000000
+	ldr	r0, =TEXT_BASE
+	mov	r1, #0x0
+	ldr	r2, =LENGTH_UBOOT
+	bl	nand_read_ll
+	tst	r0, #0x0
+	beq	ok_nand_read
+
+bad_nand_read:
+loop2:
 	/*******LED***********/
 	ldr r0, =GPBDAT
-	ldr r1, =0x160      //即：二进制101100000，PB6设为低电平，5、7、8为高电平
+	ldr r1, =0x060      //即：二进制101100000，PB6设为低电平，5、7、8为高电平
 	str r1, [r0]
+	b loop2    //infinite loop
 
-	mov r1, #NAND_CTL_BASE   //复位Nand Flash
-	ldr r2, =( (7<<12)|(7<<8)|(7<<4)|(0<<0) )
-	str r2, [r1, #oNFCONF]   //设置配置寄存器的初始值，参考s3c2440手册
-	ldr r2, [r1, #oNFCONF]
-	ldr r2, =( (1<<4)|(0<<1)|(1<<0) )
-	str r2, [r1, #oNFCONT]   //设置控制寄存器
-	ldr r2, [r1, #oNFCONT]
-	ldr r2, =(0x6)           //RnB Clear
-	str r2, [r1, #oNFSTAT]
-	ldr r2, [r1, #oNFSTAT]
-	mov r2, #0xff            //复位command
-	strb r2, [r1, #oNFCMD]
-	mov r3, #0               //等待
-nand1:
-	add r3, r3, #0x1
-	cmp r3, #0xa
-	blt nand1
-nand2:
-	ldr r2, [r1, #oNFSTAT]   //等待就绪
-	tst r2, #0x4
-	beq nand2
-	ldr r2, [r1, #oNFCONT]
-	orr r2, r2, #0x2         //取消片选
-	str r2, [r1, #oNFCONT]
-	//get read to call C functions (for nand_read())
-	ldr sp, DW_STACK_START   //为C代码准备堆栈,DW_STACK_START定义在下面
-	mov fp, #0
-	//copy U-Boot to RAM
-	ldr r0, =TEXT_BASE//传递给C代码的第一个参数：u-boot在RAM中的起始地址
-	mov r1, #0x0      //传递给C代码的第二个参数：Nand Flash的起始地址
-	mov r2, #0x30000  //传递给C代码的第三个参数：u-boot的长度大小(128k)
-	bl nand_read_ll   //此处调用C代码中读Nand的函数。
-	tst r0, #0x0
-	beq ok_nand_read
-bad_nand_read:
-loop2: b loop2    //infinite loop
 ok_nand_read:
 	//检查搬移后的数据，如果前4k完全相同，表示搬移成功
 	mov r0, #0
 	ldr r1, =TEXT_BASE
 	mov r2, #0x400           //4 bytes * 1024 = 4K-bytes
 go_next:
+/*查出问题在不匹配*/
 	ldr r3, [r0], #4
 	ldr r4, [r1], #4
 	teq r3, r4
 	bne notmatch
 	subs r2, r2, #4
-	beq stack_setup
+	beq clear_bss
 	bne go_next
 notmatch:
 loop3:
+/*******LED***********/
+ldr r0, =GPBDAT
+ldr r1, =0x1C0      //即：二进制101100000，PB6设为低电平，5、7、8为高电平
+str r1, [r0]
      b loop3           //infinite loop
 
 
@@ -322,6 +316,7 @@ norboot:
 	str r1, [r0]
 
 	/*********** CHECK_FOR_MAGIC_NUMBER***************/
+relocate:				/* relocate U-Boot to RAM	    */
 	adr r0, _start 			/* r0 <- current position of code */
 	ldr r1, _TEXT_BASE 		/* test if we run from flash or RAM */
 	ldr r2, _armboot_start
@@ -340,24 +335,8 @@ SetBootFlag:
 	mov r1,#1	/*从Nor启动，将标志设置为1*/
 	str r1,[r0]
 
-#endif	/* CONFIG_SKIP_RELOCATE_UBOOT */
 
 
-
-	/* Set up the stack						    */
-stack_setup:
-	/*******LED***********/
-	ldr r0, =GPBDAT
-	ldr r1, =0x0e0      //即：二进制011100000，PB6设为低电平，5、7、8为高电平
-	str r1, [r0]
-
-	ldr	r0, _TEXT_BASE		/* upper 128 KiB: relocated uboot   */
-	sub	r0, r0, #CONFIG_SYS_MALLOC_LEN	/* malloc area              */
-	sub	r0, r0, #CONFIG_SYS_GBL_DATA_SIZE /* bdinfo                 */
-#ifdef CONFIG_USE_IRQ
-	sub	r0, r0, #(CONFIG_STACKSIZE_IRQ+CONFIG_STACKSIZE_FIQ)
-#endif
-	sub	sp, r0, #12		/* leave 3 words for abort-stack    */
 
 
 clear_bss:
@@ -375,8 +354,6 @@ clbss_l:
 	ldr	pc, _start_armboot
 
 _start_armboot:	.word start_armboot
-.align	2
-DW_STACK_START:	.word	STACK_BASE+STACK_SIZE-4
 
 
 /*
