@@ -426,7 +426,7 @@ extern void davinci_eth_set_mac_addr (const u_int8_t *addr);
 
 #ifdef CONFIG_DRIVER_CS8900
 	/* XXX: this needs to be moved to board init */
-	//cs8900_get_enetaddr ();      /*无设备的时候造成等待-注释掉*/
+	cs8900_get_enetaddr ();      /*无设备的时候造成等待-注释掉*/
 #endif
 
 #if defined(CONFIG_DRIVER_SMC91111) || defined (CONFIG_DRIVER_LAN91C96)
