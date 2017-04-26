@@ -389,7 +389,20 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[])
 			else
 				ret = nand_write_skip_bad(nand, off, &size,
 							  (u_char *)addr);
-		} else if (!strcmp(s, ".oob")) {
+		} 
+		//添加yaffs2相关操作，注意该处又关联到nand_write_skip_bad函数
+		#if defined(CONFIG_MTD_NAND_YAFFS2)
+			else if (s != NULL && (!strcmp(s, ".yaffs2")))
+			{
+			    nand->rw_oob = 1;
+			    nand->skipfirstblk = 1;
+			    ret = nand_write_skip_bad(nand,off,&size,(u_char *)addr);
+			    nand->skipfirstblk = 0;
+			    nand->rw_oob = 0;
+			}
+		#endif
+    
+		else if (!strcmp(s, ".oob")) {
 			/* out-of-band data */
 			mtd_oob_ops_t ops = {
 				.oobbuf = (u8 *)addr,
@@ -494,6 +507,12 @@ U_BOOT_CMD(nand, CONFIG_SYS_MAXARGS, 1, do_nand,
 	"nand write - addr off|partition size\n"
 	"    read/write 'size' bytes starting at offset 'off'\n"
 	"    to/from memory address 'addr', skipping bad blocks.\n"
+	//注意：这里只添加了yaffs2的写命令，因为我们只用u-boot下载(即写)功能，所以我们没有添加yaffs2读的命令
+	#if defined(CONFIG_MTD_NAND_YAFFS2)
+	    "nand write[.yaffs2] - addr off|partition size - write `size' byte yaffs image/n"
+	    " starting at offset off' from memory address addr' (.yaffs2 for 512+16 NAND)/n"
+	#endif
+	   
 	"nand erase [clean] [off size] - erase 'size' bytes from\n"
 	"    offset 'off' (entire device if not specified)\n"
 	"nand bad - show bad blocks\n"
@@ -686,4 +705,5 @@ U_BOOT_CMD(nboot, 4, 1, do_nandboot,
 	"boot from NAND device",
 	"[partition] | [[[loadAddr] dev] offset]"
 );
+
 #endif
