@@ -164,9 +164,6 @@
 #define CONFIG_AMD_LV800	1	/* uncomment this if you have a LV800 flash */
 #endif
 
-/*
- * Nand flash register and envionment variables
- */
 
 
 /*-----------------------------------------------------------------------
@@ -220,4 +217,16 @@
 #define CONFIG_ENV_IS_IN_NAND  1
 #define CONFIG_ENV_OFFSET      0x40000 //将环境变量保存到nand中的0x40000位置
 #define CONFIG_ENV_SIZE        0x20000
+
+/*
+ * Nand affs/yaffs2文件系统
+ */
+#define CONFIG_MTD_NAND_YAFFS2   1           //定义一个管理对Yaffs2支持的宏
+                                             //开启Nand Flash默认分区，注意此处的分区要和你的内核中的分区保持一致
+#define MTDIDS_DEFAULT "nand0=nandflash0"
+#define MTDPARTS_DEFAULT "mtdparts=nandflash0:192k(bootloader)," /
+                     "64k(params)," /
+                     "2m(kernel)," /
+                     "-(root)"
+                       
 #endif	/* __CONFIG_H */
