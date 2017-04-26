@@ -114,8 +114,13 @@ struct mtd_info {
 	u_char type;
 	u_int32_t flags;
 	uint64_t size;	 /* Total size of the MTD */
-
-	/* "Major" erase size for the device. Naïve users may take this
+	
+	#if defined(CONFIG_MTD_NAND_YAFFS2)
+	    u_char rw_oob;
+	    u_char skipfirstblk;
+	#endif
+	
+	/* "Major" erase size for the device. NaÃ¯ve users may take this
 	 * to be the only erase size available, or may use the more detailed
 	 * information below if they desire
 	 */
