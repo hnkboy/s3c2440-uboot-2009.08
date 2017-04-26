@@ -558,6 +558,7 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			write_size = left_to_write;
 		else
 			write_size = nand->erasesize - block_offset;
+		
 			printf("/rWriting at 0x%llx -- ",offset); //add yaffs2 file system support
 		
 		rval = nand_write (nand, offset, &write_size, p_buffer);
@@ -569,8 +570,10 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		}
 
 		left_to_write -= write_size;
+		
+		printf("%d%% is complete.",100-(left_to_write/(*length/100)));
+		
 		offset        += write_size;
-		p_buffer      += write_size;
 		
 		#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
 		if(nand->rw_oob==1)    
