@@ -480,8 +480,8 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 	size_t left_to_write = *length;
 	size_t len_incl_bad;
 	u_char *p_buffer = buffer;
-	
-#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
+
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
 if(nand->rw_oob==1)
 {
 size_t oobsize = nand->oobsize;
@@ -520,8 +520,7 @@ left_to_write = *length;
 
 		return rval;
 	}
-	
-#if !defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
+#if !defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
 if (len_incl_bad == *length){
 rval = nand_write (nand, offset, length, buffer);
 if (rval != 0)
