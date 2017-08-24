@@ -558,7 +558,7 @@ continue;
 		else
 			write_size = nand->erasesize - block_offset;
 		
-			printf("/rWriting at 0x%llx -- ",offset); //add yaffs2 file system support
+			printf("/rWriting at 0x%llx -- ",offset);//add yaffs2 file system support
 		
 		rval = nand_write (nand, offset, &write_size, p_buffer);
 		if (rval != 0) {
@@ -577,11 +577,11 @@ continue;
 #if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
 if(nand->rw_oob==1)
 {
-	p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
-} 
+p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
+}
 else
 {
-	p_buffer += write_size;
+p_buffer += write_size;
 }
 #else
 p_buffer += write_size;
