@@ -230,3 +230,4 @@
         "-(root)"
                    
 #endif	/* __CONFIG_H */
+#define CONFIG_NET_MULTI 1
