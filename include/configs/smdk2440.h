@@ -55,9 +55,10 @@
 /*
  * Hardware drivers
  */
-#define CONFIG_DRIVER_CS8900	1	/* we have a CS8900 on-board */
-#define CS8900_BASE		0x19000300
-#define CS8900_BUS16		1 /* the Linux driver does accesses as shorts */
+#define CONFIG_NET_MULTI
+//#define CONFIG_DRIVER_CS8900	1	/* we have a CS8900 on-board */
+//#define CS8900_BASE		0x19000300
+//#define CS8900_BUS16		1 /* the Linux driver does accesses as shorts */
 
 /*
  * select serial console configuration
