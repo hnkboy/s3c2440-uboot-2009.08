@@ -224,9 +224,9 @@
 #define CONFIG_MTD_NAND_YAFFS2   1           //定义一个管理对Yaffs2支持的宏
                                              //开启Nand Flash默认分区，注意此处的分区要和你的内核中的分区保持一致
 #define MTDIDS_DEFAULT "nand0=nandflash0"
-#define MTDPARTS_DEFAULT "mtdparts=nandflash0:192k(bootloader)," /
-                     "64k(params)," /
-                     "2m(kernel)," /
-                     "-(root)"
-                       
+#define MTDPARTS_DEFAULT "mtdparts=nandflash0:192k(bootloader)," \
+        "64k(params)," \
+        "2m(kernel),"  \
+        "-(root)"
+                   
 #endif	/* __CONFIG_H */
