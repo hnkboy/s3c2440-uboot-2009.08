@@ -390,18 +390,18 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[])
 				ret = nand_write_skip_bad(nand, off, &size,
 							  (u_char *)addr);
 		} 
-		//添加yaffs2相关操作，注意该处又关联到nand_write_skip_bad函数
+        //添加yaffs2相关操作，注意该处又关联到nand_write_skip_bad函数
 		#if defined(CONFIG_MTD_NAND_YAFFS2)
 			else if (s != NULL && (!strcmp(s, ".yaffs2")))
 			{
-			    nand->rw_oob = 1;
-			    nand->skipfirstblk = 1;
-			    ret = nand_write_skip_bad(nand,off,&size,(u_char *)addr);
-			    nand->skipfirstblk = 0;
-			    nand->rw_oob = 0;
+				nand->rw_oob = 1;
+				nand->skipfirstblk = 1;
+				ret = nand_write_skip_bad(nand,off,&size,(u_char *)addr);
+				nand->skipfirstblk = 0;
+				nand->rw_oob = 0;
 			}
 		#endif
-    
+		
 		else if (!strcmp(s, ".oob")) {
 			/* out-of-band data */
 			mtd_oob_ops_t ops = {
