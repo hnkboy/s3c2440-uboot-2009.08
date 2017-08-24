@@ -1959,24 +1959,24 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	struct nand_chip *chip = mtd->priv;
 	int ret;
 	
-	#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-	    int oldopsmode = 0;
-	    if(mtd->rw_oob==1)    
-	    {
-		int i = 0;
-		int datapages = 0;
-		size_t oobsize = mtd->oobsize;
-		size_t datasize = mtd->writesize;
-		uint8_t oobtemp[oobsize];
-		datapages = len / (datasize);
-		for(i = 0; i < (datapages); i++)    
-		{
-		    memcpy((void *)oobtemp, (void *)(buf + datasize * (i + 1)), oobsize);
-		    memmove((void *)(buf + datasize * (i + 1)), (void *)(buf + datasize * (i + 1) + oobsize), (datapages - (i + 1)) * (datasize) + (datapages - 1) * oobsize);
-		    memcpy((void *)(buf+(datapages) * (datasize + oobsize) - oobsize), (void *)(oobtemp), oobsize);
-		}
-	    }
-	#endif
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
+int oldopsmode = 0;
+if(mtd->rw_oob==1)
+{
+int i = 0;
+int datapages = 0;
+size_t oobsize = mtd->oobsize;
+size_t datasize = mtd->writesize;
+uint8_t oobtemp[oobsize];
+datapages = len / (datasize);
+for(i = 0; i < (datapages); i++)
+{
+memcpy((void *)oobtemp, (void *)(buf + datasize * (i + 1)), oobsize);
+memmove((void *)(buf + datasize * (i + 1)), (void *)(buf + datasize * (i + 1) + oobsize), (datapages - (i + 1)) * (datasize) + (datapages - 1) * oobsize);
+memcpy((void *)(buf+(datapages) * (datasize + oobsize) - oobsize), (void *)(oobtemp), oobsize);
+}
+}
+#endif
 	
 	/* Do not allow reads past end of device */
 	if ((to + len) > mtd->size)
@@ -1989,21 +1989,21 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	chip->ops.len = len;
 	chip->ops.datbuf = (uint8_t *)buf;
 	
-	#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-	    if(mtd->rw_oob!=1)    
-	    {
-		chip->ops.oobbuf = NULL;
-	    } 
-	    else    
-	    {
-		chip->ops.oobbuf = (uint8_t *)(buf + len);
-		chip->ops.ooblen = mtd->oobsize;
-		oldopsmode = chip->ops.mode;
-		chip->ops.mode = MTD_OOB_RAW;
-	    }
-	#else
-	    chip->ops.oobbuf = NULL;
-	#endif	
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
+if(mtd->rw_oob!=1)
+{
+chip->ops.oobbuf = NULL;
+}
+else
+{
+chip->ops.oobbuf = (uint8_t *)(buf + len);
+chip->ops.ooblen = mtd->oobsize;
+oldopsmode = chip->ops.mode;
+chip->ops.mode = MTD_OOB_RAW;
+}
+#else
+chip->ops.oobbuf = NULL;
+#endif
 
 
 	ret = nand_do_write_ops(mtd, to, &chip->ops);
@@ -2012,9 +2012,9 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	nand_release_device(mtd);
 	
-	#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-    	chip->ops.mode = oldopsmode;
-	#endif
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
+chip->ops.mode = oldopsmode;
+#endif
 
 	return ret;
 }

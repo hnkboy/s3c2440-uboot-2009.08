@@ -481,22 +481,22 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 	size_t len_incl_bad;
 	u_char *p_buffer = buffer;
 	
-	#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-	    if(nand->rw_oob==1)    
-	    {
-		size_t oobsize = nand->oobsize;
-		size_t datasize = nand->writesize;
-		int datapages = 0;
-		if (((*length)%(nand->oobsize+nand->writesize)) != 0) 
-		{
-		 printf ("Attempt to write error length data!/n");
-		 return -EINVAL;
-	     }
-		datapages = *length/(datasize+oobsize);
-		*length = datapages*datasize;
-		left_to_write = *length;
-	    }
-	#endif
+#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
+if(nand->rw_oob==1)
+{
+size_t oobsize = nand->oobsize;
+size_t datasize = nand->writesize;
+int datapages = 0;
+if (((*length)%(nand->oobsize+nand->writesize)) != 0)
+{
+printf ("Attempt to write error length data!/n");
+return -EINVAL;
+}
+datapages = *length/(datasize+oobsize);
+*length = datapages*datasize;
+left_to_write = *length;
+}
+#endif
 	
 	/* Reject writes, which are not page aligned */
 	if ((offset & (nand->writesize - 1)) != 0 ||
@@ -521,15 +521,15 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		return rval;
 	}
 	
-	#if !defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-	    if (len_incl_bad == *length) {
-		rval = nand_write (nand, offset, length, buffer);
-		if (rval != 0)
-		    printf ("NAND write to offset %llx failed %d/n",
-			offset, rval);
-		return rval;
-	    }
-	#endif
+#if !defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
+if (len_incl_bad == *length){
+rval = nand_write (nand, offset, length, buffer);
+if (rval != 0)
+printf ("NAND write to offset %llx failed %d/n",
+offset, rval);
+return rval;
+}
+#endif
 	
 	while (left_to_write > 0) {
 		size_t block_offset = offset & (nand->erasesize - 1);
@@ -544,15 +544,15 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			continue;
 		}
 		
-		#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-		if(nand->skipfirstblk==1)    
-		{
-			nand->skipfirstblk=0;
-			printf ("Skip the first good block %llx/n", offset & ~(nand->erasesize - 1));
-			offset += nand->erasesize - block_offset;
-			continue;
-		}
-		#endif
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
+if(nand->skipfirstblk==1)
+{
+nand->skipfirstblk=0;
+printf ("Skip the first good block %llx/n", offset & ~(nand->erasesize - 1));
+offset += nand->erasesize - block_offset;
+continue;
+}
+#endif
 		
 		if (left_to_write < (nand->erasesize - block_offset))
 			write_size = left_to_write;
@@ -575,18 +575,18 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		
 		offset        += write_size;
 		
-		#if defined(CONFIG_MTD_NAND_YAFFS2) //add yaffs2 file system support
-		if(nand->rw_oob==1)    
-		{
-			p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
-		} 
-		else    
-		{
-			p_buffer += write_size;
-		}
-		#else
-		p_buffer += write_size;
-		#endif
+#if defined(CONFIG_MTD_NAND_YAFFS2)//add yaffs2 file system support
+if(nand->rw_oob==1)
+{
+	p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
+} 
+else
+{
+	p_buffer += write_size;
+}
+#else
+p_buffer += write_size;
+#endif
 		
 	}
 
