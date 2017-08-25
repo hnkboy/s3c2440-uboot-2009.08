@@ -55,10 +55,28 @@
 /*
  * Hardware drivers
  */
-#define CONFIG_NET_MULTI
+
 //#define CONFIG_DRIVER_CS8900	1	/* we have a CS8900 on-board */
 //#define CS8900_BASE		0x19000300
 //#define CS8900_BUS16		1 /* the Linux driver does accesses as shorts */
+#define CONFIG_CMD_PING
+#define CONFIG_CMD_NET
+#define CONFIG_NET_MULTI        1
+
+#define CONFIG_DRIVER_DM9000    1
+#define CONFIG_DM9000_NO_SROM   1
+#define CONFIG_DM9000_BASE      0x20000300  //网卡片选地址
+#define DM9000_IO               CONFIG_DM9000_BASE
+#define DM9000_DATA             (CONFIG_DM9000_BASE + 4)  //网卡数据地址
+//
+//u-boot-2009.08 可以自动检测DM9000网卡的位数，根据开发板原理图可知网卡的数据位为16位，并且网卡位于CPU的BANK4上，所以只需在 board/samsung/my2440/lowlevel_init.S中设置 #define B4_BWSCON (DW16) 即可，不需要此处的 #define CONFIG_DM9000_USE_16BIT 1
+//给u-boot加上ping命令，用来测试网络通不通
+
+
+#define CONFIG_ETHADDR	    08:00:3e:26:0a:5b 
+#define CONFIG_NETMASK      255.255.255.0
+#define CONFIG_IPADDR		192.168.1.105
+#define CONFIG_SERVERIP		192.168.1.103
 
 /*
  * select serial console configuration
@@ -98,10 +116,7 @@
 
 #define CONFIG_BOOTDELAY	3
 /*#define CONFIG_BOOTARGS	"root=ramfs devfs=mount console=ttySA0,9600" */
-/*#define CONFIG_ETHADDR	08:00:3e:26:0a:5b */
-#define CONFIG_NETMASK          255.255.255.0
-#define CONFIG_IPADDR		10.0.0.110
-#define CONFIG_SERVERIP		10.0.0.1
+
 /*#define CONFIG_BOOTFILE	"elinos-lart" */
 /*#define CONFIG_BOOTCOMMAND	"tftp; bootm" */
 
