@@ -63,9 +63,7 @@ TODO: external MII is not functional, only internal at the moment.
 #include <net.h>
 #include <asm/io.h>
 #include <dm9000.h>
-
 #include "dm9000x.h"
-
 /* Board/System/Debug information/definition ---------------- */
 
 /* #define CONFIG_DM9000_DEBUG */
@@ -143,11 +141,11 @@ dump_regs(void)
 
 static void dm9000_outblk_8bit(volatile void *data_ptr, int count)
 {
-	int i;
-	for (i = 0; i < count; i++)
-		DM9000_outb((((u8 *) data_ptr)[i] & 0xff), DM9000_DATA);
+    int i;
+    for (i = 0; i < count; i++){
+        DM9000_outb((((u8 *)data_ptr)[i] & 0xff), DM9000_DATA);
+    } 
 }
-
 static void dm9000_outblk_16bit(volatile void *data_ptr, int count)
 {
 	int i;
@@ -162,7 +160,7 @@ static void dm9000_outblk_32bit(volatile void *data_ptr, int count)
 	u32 tmplen = (count + 3) / 4;
 
 	for (i = 0; i < tmplen; i++)
-		DM9000_outl(((u32 *) data_ptr)[i], DM9000_DATA);
+	    DM9000_outl(((u32 *) data_ptr)[i], DM9000_DATA);
 }
 
 static void dm9000_inblk_8bit(void *data_ptr, int count)
@@ -216,7 +214,6 @@ static void dm9000_rx_status_8bit(u16 *RxStatus, u16 *RxLen)
 		__le16_to_cpu(DM9000_inb(DM9000_DATA) +
 			(DM9000_inb(DM9000_DATA) << 8));
 }
-
 /*
   Search DM9000 board, allocate space and register it
 */

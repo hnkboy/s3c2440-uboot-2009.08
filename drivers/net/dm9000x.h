@@ -61,6 +61,11 @@
 #define DM9000_ISR             0xFE
 #define DM9000_IMR             0xFF
 
+
+#define CONFIG_DM9000_BASE              0
+#define DM9000_IO                       0
+#define DM9000_DATA                     0
+
 #define NCR_EXT_PHY		(1<<7)
 #define NCR_WAKEEN		(1<<6)
 #define NCR_FCOL		(1<<4)
